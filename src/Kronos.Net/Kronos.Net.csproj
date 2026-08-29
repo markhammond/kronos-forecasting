@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Kronos.Net</AssemblyName>
+        <PackageId>Kronos.Net</PackageId>
+        <Description>Native .NET inference for the Kronos K-line foundation model. Requires Kronos.Net.Weights.*</Description>
+        <PackageTags>kronos;timeseries;forecasting;transformer;torchsharp;ohlcv;kline</PackageTags>
+        <IsPackable>true</IsPackable>
+
+        <RootNamespace>Kronos.Net</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Kronos.Net.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Managed only. The native runtime is a runtime concern, so every executable
+             picks its own: TorchSharp-cpu, TorchSharp-cuda-linux or TorchSharp-cuda-windows.
+             See https://github.com/dotnet/TorchSharp#download -->
+        <PackageReference Include="TorchSharp" Version="0.107.0" />
+    </ItemGroup>
+
+</Project>

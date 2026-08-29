@@ -1,0 +1,61 @@
+name: release
+
+# Publishing is deliberately manual and tag-driven. These packages redistribute
+# third-party weights, and a push to nuget.org cannot be undone — only delisted — so it
+# should never be a side effect of merging.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Pack and validate without pushing'
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    # Packing embeds resources; nothing here needs Metal. The Metal path is covered by
+    # the ci workflow's matrix.
+    runs-on: ubuntu-latest
+    environment: nuget
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Fetch checkpoints
+        run: ./scripts/fetch-checkpoints.sh
+
+      - name: Verify the tag matches the declared version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          declared=$(grep -o '<Version>[^<]*' Directory.Build.props | cut -d'>' -f2)
+          tagged="${GITHUB_REF_NAME#v}"
+          if [ "$declared" != "$tagged" ]; then
+            echo "::error::tag $tagged does not match <Version>$declared in Directory.Build.props"
+            exit 1
+          fi
+
+      - name: Build and test
+        run: |
+          dotnet build -c Release --nologo
+          dotnet test tests/Kronos.Net.Tests -c Release --nologo --no-build
+
+      - name: Pack
+        run: dotnet pack -c Release --nologo --no-build -o artifacts
+
+      - name: Inspect what would be published
+        run: ./scripts/verify-packages.sh artifacts
+
+      - name: Push to nuget.org
+        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry-run != true
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push 'artifacts/*.nupkg' \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

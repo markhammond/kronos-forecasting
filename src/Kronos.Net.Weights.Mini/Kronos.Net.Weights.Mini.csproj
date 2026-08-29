@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Kronos.Net.Weights.Mini</AssemblyName>
+        <RootNamespace>Kronos.Net.Weights</RootNamespace>
+        <PackageId>Kronos.Net.Weights.Mini</PackageId>
+        <Description>Kronos-mini (4.1M) weights with Kronos-Tokenizer-2k for Kronos.Net, embedded as assembly resources (~31 MB). Checkpoints redistributed unmodified from NeoQuasar (MIT) at the revision recorded in LICENSE.</Description>
+        <PackageTags>kronos;timeseries;forecasting;weights;model</PackageTags>
+        <IsPackable>true</IsPackable>
+        <!-- Checkpoints are fetched, not committed. See scripts/fetch-checkpoints.sh. -->
+        <KronosCheckpointRoot Condition="'$(KronosCheckpointRoot)' == ''">$(MSBuildThisFileDirectory)../../checkpoints</KronosCheckpointRoot>
+        <ModelSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-mini/snapshots/f4e68697d9d5aed55cef5c96aabc3376bcad9f81</ModelSnapshot>
+        <TokenizerSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-Tokenizer-2k/snapshots/26966d0035065a0cae0ebad7af8ece35bc1fb51c</TokenizerSnapshot>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Kronos.Net/Kronos.Net.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="$(ModelSnapshot)/model.safetensors" LogicalName="kronos.model" />
+        <EmbeddedResource Include="$(ModelSnapshot)/config.json" LogicalName="kronos.model.config" />
+        <EmbeddedResource Include="$(TokenizerSnapshot)/model.safetensors" LogicalName="kronos.tokenizer" />
+        <EmbeddedResource Include="$(TokenizerSnapshot)/config.json" LogicalName="kronos.tokenizer.config" />
+    </ItemGroup>
+
+    <Target Name="AssertCheckpointsPresent" BeforeTargets="BeforeBuild">
+        <Error Condition="!Exists('$(ModelSnapshot)/model.safetensors')"
+               Text="Checkpoint missing: $(ModelSnapshot)/model.safetensors. Run scripts/fetch-checkpoints.sh, or set KronosCheckpointRoot to a directory holding the published snapshots." />
+        <Error Condition="!Exists('$(TokenizerSnapshot)/model.safetensors')"
+               Text="Checkpoint missing: $(TokenizerSnapshot)/model.safetensors." />
+    </Target>
+
+</Project>

@@ -1,0 +1,84 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Unit tests need no checkpoints, so they run without the ~142 MB fetch. Both platforms:
+  # the native backend resolves per RID, and a macOS-only matrix hides that.
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # libtorch is a large per-RID download; without this both legs refetch it every run.
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ matrix.os }}-${{ hashFiles('**/*.csproj', 'Directory.Build.props') }}
+          restore-keys: nuget-${{ matrix.os }}-
+
+      # libtorch_cpu.dylib links /opt/homebrew/opt/libomp/lib/libomp.dylib by absolute
+      # path, so the libomp.dylib shipped in the package is never used and a clean runner
+      # cannot load libtorch at all. Developer Macs usually have this already.
+      - name: Install libomp
+        if: runner.os == 'macOS'
+        run: brew install libomp
+
+      - name: Build
+        run: dotnet build tests/Kronos.Net.Tests -c Release --nologo
+
+      - name: Test
+        run: dotnet test tests/Kronos.Net.Tests -c Release --nologo --no-build
+
+  # Packing embeds the checkpoints, so this job needs them. Platform-neutral.
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-pack-${{ hashFiles('**/*.csproj', 'Directory.Build.props') }}
+          restore-keys: nuget-pack-
+
+      # Key on the fetch script: revisions are pinned there and change deliberately.
+      - name: Cache checkpoints
+        uses: actions/cache@v4
+        with:
+          path: checkpoints
+          key: checkpoints-${{ hashFiles('scripts/fetch-checkpoints.sh') }}
+
+      - name: Fetch checkpoints
+        run: ./scripts/fetch-checkpoints.sh
+
+      - name: Pack
+        run: dotnet pack -c Release --nologo -o artifacts
+
+      # Catches metadata faults — a missing licence, an unembedded checkpoint — that
+      # otherwise surface only on release.
+      - name: Verify
+        run: ./scripts/verify-packages.sh artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: artifacts/*.nupkg

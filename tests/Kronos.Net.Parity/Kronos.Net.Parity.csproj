@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Kronos.Net.Parity</RootNamespace>
+        <!-- A development gate, not a shipped artefact. -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!--
+        Checks Genotype.Kronos against tensors exported from the reference
+        implementation. Kept out of the test project because the fixtures it reads are
+        large and the comparison is a development gate, not a per-commit assertion.
+    -->
+
+    <ItemGroup>
+        <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Kronos.Net\Kronos.Net.csproj" />
+    </ItemGroup>
+
+</Project>

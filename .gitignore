@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+artifacts/
+
+# Checkpoints are fetched, never committed: the Small pair alone is ~110 MB and git
+# history is append-only. scripts/fetch-checkpoints.sh retrieves the pinned revisions.
+checkpoints/
+*.safetensors

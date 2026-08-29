@@ -1,0 +1,101 @@
+MIT License
+
+Copyright (c) 2026 Mark Hammond
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+================================================================================
+THIRD-PARTY NOTICES
+================================================================================
+
+This project is a port. The model architecture, the Binary Spherical
+Quantization tokenizer and the reference implementation it was verified against
+are the work of the authors below, and their notices are reproduced as the MIT
+licence requires.
+
+--------------------------------------------------------------------------------
+1. Kronos — reference implementation and model architecture
+   https://github.com/shiyu-coder/Kronos
+--------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2025 ShiYu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Associated paper: "Kronos: A Foundation Model for the Language of Financial
+Markets", arXiv:2508.02739.
+
+--------------------------------------------------------------------------------
+2. Pre-trained checkpoints — redistributed unmodified
+   Publisher: NeoQuasar (https://huggingface.co/NeoQuasar)
+--------------------------------------------------------------------------------
+
+The Kronos.Net.Weights.* packages embed the following published checkpoints
+verbatim. Each repository declares the MIT licence via its model-card metadata
+(`license: mit`) but publishes no LICENCE file and states no separate copyright
+holder, so there is no further notice to reproduce. The exact revisions
+redistributed are recorded here and asserted at build time.
+
+  Kronos.Net.Weights.Small
+    NeoQuasar/Kronos-small
+      revision 901c26c1332695a2a8f243eb2f37243a37bea320
+    NeoQuasar/Kronos-Tokenizer-base
+      revision 0e0117387f39004a9016484a186a908917e22426
+
+  Kronos.Net.Weights.Mini
+    NeoQuasar/Kronos-mini
+      revision f4e68697d9d5aed55cef5c96aabc3376bcad9f81
+    NeoQuasar/Kronos-Tokenizer-2k
+      revision 26966d0035065a0cae0ebad7af8ece35bc1fb51c
+
+The tokenizer checkpoints are published as separate repositories from the
+models but by the same publisher under the same declared licence, so they need
+no distinct treatment beyond being listed. A model and its tokenizer are not
+independently valid and are always distributed as a pair.
+
+--------------------------------------------------------------------------------
+3. Runtime dependency
+--------------------------------------------------------------------------------
+
+TorchSharp and the libtorch native runtime are separate works under their own
+licences, obtained through NuGet. Neither is redistributed here.
+
+--------------------------------------------------------------------------------
+
+This project is independent and is not affiliated with, endorsed by, or
+supported by ShiYu or NeoQuasar.

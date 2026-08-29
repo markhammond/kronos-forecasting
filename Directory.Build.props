@@ -1,0 +1,42 @@
+<Project>
+
+    <!--
+        Shared settings for every project in this repository. Package metadata lives here
+        rather than in each csproj so the three published packages cannot drift apart in
+        version, licence or attribution — a mismatch that only shows up after publishing.
+    -->
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>0.1.0-preview.1</Version>
+        <Authors>Mark Hammond</Authors>
+        <Copyright>Copyright (c) 2026 Mark Hammond</Copyright>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageProjectUrl>https://github.com/markhammond/kronos-net</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/markhammond/kronos-net</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <!-- Off by default so tests and the parity harness are not packed by a bare
+             `dotnet pack` at the solution root; the three shipped projects opt back in. -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <!-- Every package carries the licence and readme from the repository root, so the
+         third-party notices travel with the binaries rather than living only here. -->
+    <ItemGroup Condition="'$(IsPackable)' == 'true'">
+        <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Visible="false" />
+        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+    </ItemGroup>
+
+</Project>

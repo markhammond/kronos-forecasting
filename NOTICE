@@ -1,0 +1,12 @@
+Kronos.Net
+Copyright (c) 2026 Mark Hammond
+
+This product includes software developed by ShiYu (https://github.com/shiyu-coder/Kronos),
+licensed under the MIT License. The model architecture, the Binary Spherical Quantization
+tokenizer and the reference implementation this port was verified against are that work.
+
+This product redistributes pre-trained checkpoints published by NeoQuasar
+(https://huggingface.co/NeoQuasar) under the MIT License, unmodified, in the
+Kronos.Net.Weights.* packages. The exact revisions are recorded in LICENSE.
+
+See LICENSE for the full notices.
