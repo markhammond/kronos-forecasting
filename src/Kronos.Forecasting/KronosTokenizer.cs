@@ -2,7 +2,7 @@ using TorchSharp;
 using TorchSharp.Modules;
 using static TorchSharp.torch;
 
-namespace Kronos.Net;
+namespace Kronos.Forecasting;
 
 /// <summary>
 /// The BSQ tokenizer: continuous OHLCVA bars to two 10-bit subtoken streams, and back.

@@ -1,20 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <AssemblyName>Kronos.Net.Weights.Mini</AssemblyName>
-        <RootNamespace>Kronos.Net.Weights</RootNamespace>
-        <PackageId>Kronos.Net.Weights.Mini</PackageId>
-        <Description>Kronos-mini (4.1M) weights with Kronos-Tokenizer-2k for Kronos.Net, embedded as assembly resources (~31 MB). Checkpoints redistributed unmodified from NeoQuasar (MIT) at the revision recorded in LICENSE.</Description>
+        <AssemblyName>Kronos.Forecasting.Weights.Small</AssemblyName>
+        <RootNamespace>Kronos.Forecasting.Weights</RootNamespace>
+        <PackageId>Kronos.Forecasting.Weights.Small</PackageId>
+        <Description>Kronos-small (24.7M) weights with Kronos-Tokenizer-base for Kronos.Forecasting, embedded as assembly resources (~110 MB). Checkpoints redistributed unmodified from NeoQuasar (MIT) at the revision recorded in LICENSE.</Description>
         <PackageTags>kronos;timeseries;forecasting;weights;model</PackageTags>
         <IsPackable>true</IsPackable>
         <!-- Checkpoints are fetched, not committed. See scripts/fetch-checkpoints.sh. -->
         <KronosCheckpointRoot Condition="'$(KronosCheckpointRoot)' == ''">$(MSBuildThisFileDirectory)../../checkpoints</KronosCheckpointRoot>
-        <ModelSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-mini/snapshots/f4e68697d9d5aed55cef5c96aabc3376bcad9f81</ModelSnapshot>
-        <TokenizerSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-Tokenizer-2k/snapshots/26966d0035065a0cae0ebad7af8ece35bc1fb51c</TokenizerSnapshot>
+        <ModelSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-small/snapshots/901c26c1332695a2a8f243eb2f37243a37bea320</ModelSnapshot>
+        <TokenizerSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-Tokenizer-base/snapshots/0e0117387f39004a9016484a186a908917e22426</TokenizerSnapshot>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Kronos.Net/Kronos.Net.csproj" />
+        <ProjectReference Include="../Kronos.Forecasting/Kronos.Forecasting.csproj" />
     </ItemGroup>
 
     <ItemGroup>

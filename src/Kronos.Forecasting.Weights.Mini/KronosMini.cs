@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Kronos.Net.Weights;
+namespace Kronos.Forecasting.Weights;
 
 /// <summary>
 /// Kronos-mini (4.1M parameters) with Kronos-Tokenizer-2k. 2048-token context, though a consumer capped below that gains nothing from the extra reach.

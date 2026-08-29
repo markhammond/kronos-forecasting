@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Kronos.Net.Weights;
+namespace Kronos.Forecasting.Weights;
 
 /// <summary>
 /// Kronos-small (24.7M parameters) with Kronos-Tokenizer-base. 512-token context.

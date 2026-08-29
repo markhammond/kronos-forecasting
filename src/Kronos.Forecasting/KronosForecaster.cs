@@ -2,7 +2,7 @@ using System.Buffers;
 using static TorchSharp.torch;
 using F = TorchSharp.torch.nn.functional;
 
-namespace Kronos.Net;
+namespace Kronos.Forecasting;
 
 /// <summary>
 /// End-to-end inference: raw bars in, per-window summaries out.

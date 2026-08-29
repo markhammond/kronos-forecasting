@@ -1,8 +1,18 @@
-# Kronos.Net
+# Kronos.Forecasting
 
 Native .NET inference for [Kronos](https://github.com/shiyu-coder/Kronos), a pre-trained
 autoregressive model over K-line (OHLCVA) sequences. Runs on CPU or Apple GPU via
 TorchSharp.
+
+[![ci](https://github.com/markhammond/kronos-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/markhammond/kronos-forecasting/actions/workflows/ci.yml)
+
+Targets .NET 10
+
+NuGet packages:
+
+* Kronos.Forecasting [![NuGet](https://img.shields.io/nuget/v/Kronos.Forecasting.svg)](https://www.nuget.org/packages/Kronos.Forecasting)
+* Kronos.Forecasting.Weights.Small [![NuGet](https://img.shields.io/nuget/v/Kronos.Forecasting.Weights.Small.svg)](https://www.nuget.org/packages/Kronos.Forecasting.Weights.Small)
+* Kronos.Forecasting.Weights.Mini [![NuGet](https://img.shields.io/nuget/v/Kronos.Forecasting.Weights.Mini.svg)](https://www.nuget.org/packages/Kronos.Forecasting.Weights.Mini)
 
 ## Why this exists
 
@@ -16,8 +26,8 @@ architecture had to be ported.
 ## Install
 
 ```
-dotnet add package Kronos.Net
-dotnet add package Kronos.Net.Weights.Small     # or .Mini
+dotnet add package Kronos.Forecasting
+dotnet add package Kronos.Forecasting.Weights.Small     # or .Mini
 dotnet add package TorchSharp-cpu               # or a CUDA backend
 ```
 
@@ -32,8 +42,8 @@ download guidance](https://github.com/dotnet/TorchSharp#download) for CUDA.
 ## Use
 
 ```csharp
-using Kronos.Net;
-using Kronos.Net.Weights;
+using Kronos.Forecasting;
+using Kronos.Forecasting.Weights;
 using static TorchSharp.torch;
 
 using var forecaster = KronosForecaster.Load(KronosSmall.Instance, new Device("mps"));
@@ -103,6 +113,6 @@ is therefore not batch-invariant. Distributionally identical; the stream is not.
 
 The model architecture, tokenizer and reference implementation are the work of
 [ShiYu](https://github.com/shiyu-coder/Kronos) (MIT). Published checkpoints are by
-NeoQuasar (MIT) and are redistributed unmodified in the `Kronos.Net.Weights.*` packages,
+NeoQuasar (MIT) and are redistributed unmodified in the `Kronos.Forecasting.Weights.*` packages,
 which record the revision each was built from. This project is an independent port and is
 not affiliated with or endorsed by either.

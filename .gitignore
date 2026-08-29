@@ -10,3 +10,6 @@ artifacts/
 # history is append-only. scripts/fetch-checkpoints.sh retrieves the pinned revisions.
 checkpoints/
 *.safetensors
+
+# macOS Finder metadata
+.DS_Store

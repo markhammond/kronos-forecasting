@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <AssemblyName>Kronos.Net</AssemblyName>
-        <PackageId>Kronos.Net</PackageId>
-        <Description>Native .NET inference for the Kronos K-line foundation model. Requires Kronos.Net.Weights.*</Description>
+        <AssemblyName>Kronos.Forecasting</AssemblyName>
+        <PackageId>Kronos.Forecasting</PackageId>
+        <Description>Native .NET inference for the Kronos K-line foundation model. Requires Kronos.Forecasting.Weights.*</Description>
         <PackageTags>kronos;timeseries;forecasting;transformer;torchsharp;ohlcv;kline</PackageTags>
         <IsPackable>true</IsPackable>
 
-        <RootNamespace>Kronos.Net</RootNamespace>
+        <RootNamespace>Kronos.Forecasting</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Kronos.Net.Tests" />
+        <InternalsVisibleTo Include="Kronos.Forecasting.Tests" />
     </ItemGroup>
 
     <ItemGroup>

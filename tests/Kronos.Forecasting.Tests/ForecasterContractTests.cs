@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace Kronos.Net.Tests;
+namespace Kronos.Forecasting.Tests;
 
 /// <summary>
 /// The parts of the forecaster that hold without weights loaded: the row arithmetic every

@@ -42,7 +42,7 @@ jobs:
       - name: Build and test
         run: |
           dotnet build -c Release --nologo
-          dotnet test tests/Kronos.Net.Tests -c Release --nologo --no-build
+          dotnet test tests/Kronos.Forecasting.Tests -c Release --nologo --no-build
 
       - name: Pack
         run: dotnet pack -c Release --nologo --no-build -o artifacts
@@ -50,11 +50,26 @@ jobs:
       - name: Inspect what would be published
         run: ./scripts/verify-packages.sh artifacts
 
+      # Kept for the manual route: tag, let this build and verify, then download and
+      # upload through nuget.org rather than trusting a local working tree.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ github.ref_name }}
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+
       - name: Push to nuget.org
         if: startsWith(github.ref, 'refs/tags/v') && inputs.dry-run != true
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
+          # No key means publishing is being done by hand; the packages are attached
+          # above. Skip rather than fail, so tagging stays safe either way.
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::notice::NUGET_API_KEY unset — skipping the push; upload the attached packages manually."
+            exit 0
+          fi
           dotnet nuget push 'artifacts/*.nupkg' \
             --api-key "$NUGET_API_KEY" \
             --source https://api.nuget.org/v3/index.json \

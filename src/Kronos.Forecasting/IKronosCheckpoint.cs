@@ -1,4 +1,4 @@
-namespace Kronos.Net;
+namespace Kronos.Forecasting;
 
 /// <summary>
 /// A source of pre-trained weights. Streams, not paths: an embedded resource is located

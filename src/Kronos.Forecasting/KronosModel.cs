@@ -2,7 +2,7 @@ using TorchSharp;
 using TorchSharp.Modules;
 using static TorchSharp.torch;
 
-namespace Kronos.Net;
+namespace Kronos.Forecasting;
 
 /// <summary>
 /// The autoregressive model over subtoken pairs. The two decode passes differ in cost:

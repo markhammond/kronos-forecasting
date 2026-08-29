@@ -30,7 +30,7 @@ for pkg in "$DIR"/*.nupkg; do
   # A weights package with no embedded payload builds and publishes cleanly, then fails
   # at load for every consumer — worth an explicit check.
   case "$name" in
-    Kronos.Net.Weights.*)
+    Kronos.Forecasting.Weights.*)
       if [ "$size" -lt 10 ]; then
         echo "   EMPTY   weights package is only ${size} MB; the checkpoint did not embed"; fail=1
       else

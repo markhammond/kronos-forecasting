@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kronos.Forecasting.Weights.Mini/Kronos.Forecasting.Weights.Mini.csproj" />
+    <Project Path="src/Kronos.Forecasting.Weights.Small/Kronos.Forecasting.Weights.Small.csproj" />
+    <Project Path="src/Kronos.Forecasting/Kronos.Forecasting.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Kronos.Forecasting.Parity/Kronos.Forecasting.Parity.csproj" />
+    <Project Path="tests/Kronos.Forecasting.Tests/Kronos.Forecasting.Tests.csproj" />
+  </Folder>
+</Solution>
