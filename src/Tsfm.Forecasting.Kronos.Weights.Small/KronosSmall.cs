@@ -19,6 +19,9 @@ public sealed class KronosSmall : EmbeddedCheckpoint
 
     public override string Name => "NeoQuasar--Kronos-small@901c26c1332695a2a8f243eb2f37243a37bea320";
 
+    /// <inheritdoc/>
+    public override int MaxContext => 512;
+
     protected override Assembly Host => typeof(KronosSmall).Assembly;
     protected override string ModelResource => "kronos.model";
     protected override string ModelConfigResource => "kronos.model.config";

@@ -24,6 +24,35 @@ public sealed class KronosForecaster : IDisposable
 
     /// <summary>Rows this slice produces, <c>L − K + 1</c>. Size buffers from this; a
     /// wrong count misaligns every row.</summary>
+    /// <summary>
+    /// Channels per bar, in order: open, high, low, close, volume, amount. Input is
+    /// row-major, so bar <c>i</c> occupies <c>[i * Channels, i * Channels + Channels)</c>.
+    ///
+    /// <para>All of them are read and there is no mask, so a channel you lack must be
+    /// filled rather than omitted — see <see cref="Infer"/> for the fills the reference
+    /// uses. Amount is quote volume; where only base volume is known, the reference
+    /// derives it as <c>volume * mean(open, high, low, close)</c>.</para>
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// var ohlcva = new float[history.Count * KronosForecaster.Channels];
+    /// var timeMs = new long[history.Count];
+    /// for (var i = 0; i &lt; history.Count; i++)
+    /// {
+    ///     var c = history[i];
+    ///     var o = i * KronosForecaster.Channels;
+    ///     ohlcva[o + 0] = c.Open;
+    ///     ohlcva[o + 1] = c.High;
+    ///     ohlcva[o + 2] = c.Low;
+    ///     ohlcva[o + 3] = c.Close;
+    ///     ohlcva[o + 4] = c.Volume;
+    ///     ohlcva[o + 5] = c.Volume * (c.Open + c.High + c.Low + c.Close) / 4f;
+    ///     timeMs[i] = c.CloseTime.ToUnixTimeMilliseconds();
+    /// }
+    /// </code>
+    /// </example>
+    public const int Channels = 6;
+
     public static int OutputCount(int barCount, int contextBars) => barCount - contextBars + 1;
 
     private KronosForecaster(KronosTokenizerEncoder tokenizer, KronosModel model, Device device)
@@ -31,10 +60,13 @@ public sealed class KronosForecaster : IDisposable
 
     public string CheckpointName { get; private init; } = string.Empty;
 
+    /// <summary>Longest context the loaded checkpoint can attend over, in bars.</summary>
+    public int MaxContext { get; private init; }
+
     public static KronosForecaster Load(ICheckpoint checkpoint, Device device)
         => new(KronosTokenizerEncoder.FromCheckpoint(checkpoint, device),
                KronosModel.FromCheckpoint(checkpoint, device), device)
-           { CheckpointName = checkpoint.Name };
+           { CheckpointName = checkpoint.Name, MaxContext = checkpoint.MaxContext };
 
     /// <summary>
     /// One inference over a contiguous slice, re-windowed internally so the payload is
@@ -73,12 +105,68 @@ public sealed class KronosForecaster : IDisposable
         Span<float> lean, Span<int> upCount, Span<float> dispersion,
         int contextBars, int horizon, int rollouts, bool greedy,
         float temperature, float topP, int batch = 8)
+        => InferCore(ohlcva, barTimeMs, lean, upCount, dispersion, default, null,
+            contextBars, horizon, rollouts, greedy, temperature, topP, batch);
+
+    // CS1573 does not expand <inheritdoc>, though the IDE does, so the shared parameters
+    // would have to be duplicated from Infer to satisfy a check the tooltips already pass.
+#pragma warning disable CS1573
+    /// <inheritdoc cref="Infer"/>
+    /// <summary>
+    /// As <see cref="Infer"/>, and additionally writes the projected OHLCVA path.
+    /// </summary>
+    /// <param name="path">Receives <c>rows x horizon x 6</c>, row-major, in the same channel
+    /// order as the input. Sized by <see cref="PathLength"/>.</param>
+    /// <param name="aggregate">Reduces the rollouts for one channel at one step to a single
+    /// value; null uses <see cref="RolloutAggregators.Mean"/>, matching the reference, which
+    /// averages across samples per element. Samples are ordered by rollout index, so
+    /// <see cref="RolloutAggregators.Rollout"/> selects one whole path.</param>
+    /// <remarks>
+    /// The result NEED NOT satisfy <c>high >= max(open, close)</c> or
+    /// <c>low &lt;= min(open, close)</c>. This is the model, not the aggregation: channels
+    /// are decoded independently and neither this port nor the reference constrains them.
+    /// A single rollout broke the ordering in roughly 30% to 70% of candles depending on
+    /// the checkpoint, the smaller ones being worse; averaging across rollouts reduces that
+    /// severalfold, because it cancels the per-channel noise rather than preventing it.
+    /// Clamp after the fact if you need well-formed candles.
+    ///
+    /// <para>Measured on 5-minute BTC over one week (n=2016), the projected direction was
+    /// not distinguishable from noise, and rollout spread mostly restated trailing realised
+    /// volatility. Treat the path as a plausible sample, not a forecast, unless you have
+    /// measured otherwise on your own instrument.</para>
+    ///
+    /// <para>Not thread safe.</para>
+    /// </remarks>
+    public bool InferPath(ReadOnlySpan<float> ohlcva, ReadOnlySpan<long> barTimeMs,
+        Span<float> lean, Span<int> upCount, Span<float> dispersion, Span<float> path,
+        int contextBars, int horizon, int rollouts, bool greedy,
+        float temperature, float topP, RolloutAggregator? aggregate = null, int batch = 8)
+        => InferCore(ohlcva, barTimeMs, lean, upCount, dispersion, path,
+            aggregate ?? RolloutAggregators.Mean,
+            contextBars, horizon, rollouts, greedy, temperature, topP, batch);
+#pragma warning restore CS1573
+
+    /// <summary>Elements <see cref="InferPath"/> writes: <c>(L - K + 1) * horizon * Channels</c>.</summary>
+    public static int PathLength(int barCount, int contextBars, int horizon)
+        => OutputCount(barCount, contextBars) * horizon * Channels;
+
+    private bool InferCore(ReadOnlySpan<float> ohlcva, ReadOnlySpan<long> barTimeMs,
+        Span<float> lean, Span<int> upCount, Span<float> dispersion, Span<float> path,
+        RolloutAggregator? aggregate,
+        int contextBars, int horizon, int rollouts, bool greedy,
+        float temperature, float topP, int batch = 8)
     {
         var k = contextBars;
         var h = horizon;
         var length = barTimeMs.Length;
-        if (ohlcva.Length != length * 6)
+        if (ohlcva.Length != length * Channels)
             throw new ArgumentException("ohlcva must be L x 6", nameof(ohlcva));
+
+        // Upstream truncates silently, which reads as a working call that quietly ignored
+        // the bars beyond the limit. Refuse instead, and say what the limit is.
+        if (k > MaxContext)
+            throw new ArgumentOutOfRangeException(nameof(contextBars),
+                $"{CheckpointName} attends over at most {MaxContext} bars; got {k}.");
 
         var count = OutputCount(length, k);
         if (count <= 0) return false;
@@ -92,34 +180,44 @@ public sealed class KronosForecaster : IDisposable
             throw new ArgumentException(
                 $"dispersion must hold exactly {count} rows or be empty; got {dispersion.Length}.");
 
+        if (!path.IsEmpty && path.Length != count * h * Channels)
+            throw new ArgumentException(
+                $"path must hold exactly {count * h * Channels} elements (rows x horizon x 6); " +
+                $"got {path.Length}. Use {nameof(PathLength)}.");
+
         lean.Fill(float.NaN);
         if (!dispersion.IsEmpty) dispersion.Fill(float.NaN);
+        if (!path.IsEmpty) path.Fill(float.NaN);
         upCount.Clear();
 
         var stamps = ArrayPool<float>.Shared.Rent(length * 5);
         // Size scratch for a full batch and reuse it across the slice; per-batch
         // allocation dominates a materialisation-sized run.
         var maxRows = batch * rollouts;
-        var x = ArrayPool<float>.Shared.Rent(maxRows * k * 6);
+        var x = ArrayPool<float>.Shared.Rent(maxRows * k * Channels);
         var stamp = ArrayPool<float>.Shared.Rent(maxRows * (k + h) * 5);
-        var mean = ArrayPool<float>.Shared.Rent(batch * 6);
-        var scale = ArrayPool<float>.Shared.Rent(batch * 6);
+        var mean = ArrayPool<float>.Shared.Rent(batch * Channels);
+        var scale = ArrayPool<float>.Shared.Rent(batch * Channels);
         var anchor = ArrayPool<float>.Shared.Rent(batch);
         var uniforms = ArrayPool<float>.Shared.Rent(batch * rollouts * h * 2);
         var pick = ArrayPool<float>.Shared.Rent(maxRows);
+        var samples = ArrayPool<float>.Shared.Rent(rollouts);
+        var per = ArrayPool<double>.Shared.Rent(rollouts);
 
         try
         {
-            BuildStamps(barTimeMs, stamps);
+            BuildStamps(barTimeMs, stamps.AsSpan(0, length * 5));
             var stepMs = length > 1 ? barTimeMs[1] - barTimeMs[0] : 0L;
 
             using var _ = no_grad();
             for (var start = 0; start < count; start += batch)
             {
                 var take = Math.Min(batch, count - start);
-                EvaluateBatch(ohlcva, barTimeMs, stamps, stepMs, start, take,
+                EvaluateBatch(ohlcva, barTimeMs, stamps.AsSpan(0, length * 5), stepMs, start, take,
                     k, h, rollouts, greedy, temperature, topP,
-                    lean, upCount, dispersion, x, stamp, mean, scale, anchor, uniforms, pick);
+                    lean, upCount, dispersion, path, aggregate,
+                    samples.AsSpan(0, rollouts), per.AsSpan(0, rollouts),
+                    x, stamp, mean, scale, anchor, uniforms, pick);
             }
             return true;
         }
@@ -133,13 +231,16 @@ public sealed class KronosForecaster : IDisposable
             ArrayPool<float>.Shared.Return(anchor);
             ArrayPool<float>.Shared.Return(uniforms);
             ArrayPool<float>.Shared.Return(pick);
+            ArrayPool<float>.Shared.Return(samples);
+            ArrayPool<double>.Shared.Return(per);
         }
     }
 
     private void EvaluateBatch(
-        ReadOnlySpan<float> ohlcva, ReadOnlySpan<long> barTimeMs, float[] stamps, long stepMs,
+        ReadOnlySpan<float> ohlcva, ReadOnlySpan<long> barTimeMs, ReadOnlySpan<float> stamps, long stepMs,
         int start, int take, int k, int h, int rollouts, bool greedy, float temperature, float topP,
         Span<float> lean, Span<int> upCount, Span<float> dispersion,
+        Span<float> path, RolloutAggregator? aggregate, Span<float> samples, Span<double> per,
         float[] x, float[] stamp, float[] mean, float[] scale, float[] anchor,
         float[] uniforms, float[] pick)
     {
@@ -151,19 +252,19 @@ public sealed class KronosForecaster : IDisposable
         for (var w = 0; w < take; w++)
         {
             var origin = start + w;
-            NormaliseWindow(ohlcva, origin, k, mean.AsSpan(w * 6, 6), scale.AsSpan(w * 6, 6));
-            anchor[w] = ohlcva[(origin + k - 1) * 6 + 3];               // close of the anchor bar
+            NormaliseWindow(ohlcva, origin, k, mean.AsSpan(w * Channels, Channels), scale.AsSpan(w * Channels, Channels));
+            anchor[w] = ohlcva[(origin + k - 1) * Channels + 3];               // close of the anchor bar
 
             for (var r = 0; r < rollouts; r++)
             {
                 var row = w * rollouts + r;
                 for (var t = 0; t < k; t++)
-                for (var c = 0; c < 6; c++)
+                for (var c = 0; c < Channels; c++)
                 {
-                    var v = (ohlcva[(origin + t) * 6 + c] - mean[w * 6 + c]) / (scale[w * 6 + c] + 1e-5f);
-                    x[(row * k + t) * 6 + c] = Math.Clamp(v, -5f, 5f);
+                    var v = (ohlcva[(origin + t) * Channels + c] - mean[w * Channels + c]) / (scale[w * Channels + c] + 1e-5f);
+                    x[(row * k + t) * Channels + c] = Math.Clamp(v, -5f, 5f);
                 }
-                Array.Copy(stamps, origin * 5, stamp, row * (k + h) * 5, k * 5);
+                stamps.Slice(origin * 5, k * 5).CopyTo(stamp.AsSpan(row * (k + h) * 5, k * 5));
                 for (var j = 0; j < h; j++)                              // forward stamps: extrapolated
                     WriteStamp(stamp, row * (k + h) + k + j, barTimeMs[origin + k - 1] + stepMs * (j + 1));
             }
@@ -171,7 +272,7 @@ public sealed class KronosForecaster : IDisposable
 
         // Slice explicitly. ArrayPool returns arrays longer than requested and the final
         // batch fills fewer rows; reshaping the backing array reinterprets stale values.
-        var xt = tensor(new Memory<float>(x, 0, bn * k * 6), [bn, (long)k, 6L]).to(_device);
+        var xt = tensor(new Memory<float>(x, 0, bn * k * Channels), [bn, (long)k, (long)Channels]).to(_device);
         var st = tensor(new Memory<float>(stamp, 0, bn * (k + h) * 5), [bn, k + h, 5L]).to(_device);
 
         var (s1, s2) = _tokenizer.forward(xt);
@@ -194,16 +295,19 @@ public sealed class KronosForecaster : IDisposable
             post.select(1, len).copy_(b.squeeze(-1));
         }
 
-        // Decode the whole sequence, keep the generated tail, and read the close channel.
+        // Decode the whole sequence and keep the generated tail. All six channels are
+        // materialised only when a path is requested; otherwise just the close.
         var decoded = _tokenizer.Decode(pre, post).narrow(1, k, h);
         var closes = decoded.select(-1, 3).to(ScalarType.Float32).cpu().data<float>().ToArray();
+        var all = path.IsEmpty
+            ? []
+            : decoded.reshape(bn * h * Channels).to(ScalarType.Float32).cpu().data<float>().ToArray();
 
         for (var w = 0; w < take; w++)
         {
-            var mu = mean[w * 6 + 3];
-            var sd = scale[w * 6 + 3];
+            var mu = mean[w * Channels + 3];
+            var sd = scale[w * Channels + 3];
             var c0 = anchor[w];
-            var per = new double[rollouts];
             for (var r = 0; r < rollouts; r++)
             {
                 double sum = 0;
@@ -211,7 +315,7 @@ public sealed class KronosForecaster : IDisposable
                     sum += closes[(w * rollouts + r) * h + j] * (sd + 1e-5f) + mu;
                 per[r] = sum / h / c0 - 1.0;
             }
-            Array.Sort(per);
+            per.Sort();
             var up = 0;
             foreach (var v in per) if (v > 0) up++;
             // Median, not mean: the mean converges to the greedy projection and outlier
@@ -221,10 +325,24 @@ public sealed class KronosForecaster : IDisposable
                 : 0.5 * (per[rollouts / 2 - 1] + per[rollouts / 2]));
             upCount[start + w] = up;
             if (!dispersion.IsEmpty) dispersion[start + w] = rollouts > 1 ? (float)StdDev(per) : 0f;
+
+            if (path.IsEmpty) continue;
+            var reduce = aggregate!;
+            var window = path.Slice((start + w) * h * Channels, h * Channels);
+            for (var j = 0; j < h; j++)
+            for (var ch = 0; ch < Channels; ch++)
+            {
+                // Ordered by rollout index, so a delegate returning samples[i] picks one
+                // whole path and keeps the candle internally consistent.
+                for (var r = 0; r < rollouts; r++)
+                    samples[r] = all[((w * rollouts + r) * h + j) * Channels + ch]
+                                 * (scale[w * Channels + ch] + 1e-5f) + mean[w * Channels + ch];
+                window[j * Channels + ch] = reduce(samples);
+            }
         }
     }
 
-    private static double StdDev(double[] v)
+    private static double StdDev(ReadOnlySpan<double> v)
     {
         double m = 0;
         foreach (var t in v) m += t;
@@ -239,15 +357,15 @@ public sealed class KronosForecaster : IDisposable
     private static void NormaliseWindow(
         ReadOnlySpan<float> ohlcva, int origin, int k, Span<float> mean, Span<float> sd)
     {
-        for (var c = 0; c < 6; c++)
+        for (var c = 0; c < Channels; c++)
         {
             double sum = 0;
-            for (var t = 0; t < k; t++) sum += ohlcva[(origin + t) * 6 + c];
+            for (var t = 0; t < k; t++) sum += ohlcva[(origin + t) * Channels + c];
             var m = sum / k;
             double acc = 0;
             for (var t = 0; t < k; t++)
             {
-                var d = ohlcva[(origin + t) * 6 + c] - m;
+                var d = ohlcva[(origin + t) * Channels + c] - m;
                 acc += d * d;
             }
             mean[c] = (float)m;
@@ -314,12 +432,12 @@ public sealed class KronosForecaster : IDisposable
     /// <summary>Calendar features: minute, hour, weekday, day-of-month, month.
     /// <b>Weekday is Monday-zero</b>, as pandas. <see cref="DayOfWeek"/> is Sunday-zero;
     /// using it directly shifts every weekday embedding by one, silently.</summary>
-    private static void BuildStamps(ReadOnlySpan<long> barTimeMs, float[] stamps)
+    private static void BuildStamps(ReadOnlySpan<long> barTimeMs, Span<float> stamps)
     {
         for (var i = 0; i < barTimeMs.Length; i++) WriteStamp(stamps, i, barTimeMs[i]);
     }
 
-    public static void WriteStamp(float[] dst, int row, long unixMs)
+    public static void WriteStamp(Span<float> dst, int row, long unixMs)
     {
         var t = DateTimeOffset.FromUnixTimeMilliseconds(unixMs).UtcDateTime;
         var o = row * 5;

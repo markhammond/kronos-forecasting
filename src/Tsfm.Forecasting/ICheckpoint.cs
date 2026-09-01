@@ -13,6 +13,11 @@ public interface ICheckpoint
     /// <summary>Repository name and revision, for provenance.</summary>
     string Name { get; }
 
+    /// <summary>Longest context this checkpoint can attend over, in bars. A property of the
+    /// checkpoint, not the architecture — it varies between published models. Supplying more
+    /// is not an error upstream, which truncates, but the excess is simply not read.</summary>
+    int MaxContext { get; }
+
     Stream OpenModel();
     string ModelConfigJson { get; }
 
@@ -22,10 +27,15 @@ public interface ICheckpoint
 
 /// <summary>Load from the published snapshot layout: <c>config.json</c> beside
 /// <c>model.safetensors</c>. Development and parity only.</summary>
-public sealed class DirectoryCheckpoint(string modelDir, string tokenizerDir, string? name = null)
+public sealed class DirectoryCheckpoint(
+    string modelDir, string tokenizerDir, int maxContext = 512, string? name = null)
     : ICheckpoint
 {
     public string Name { get; } = name ?? Path.GetFileName(modelDir.TrimEnd(Path.DirectorySeparatorChar));
+
+    /// <summary>Not discoverable from a snapshot directory, so the caller supplies it;
+    /// 512 matches Kronos-small and Kronos-base.</summary>
+    public int MaxContext { get; } = maxContext;
 
     public Stream OpenModel() => File.OpenRead(Path.Combine(modelDir, "model.safetensors"));
     public string ModelConfigJson => File.ReadAllText(Path.Combine(modelDir, "config.json"));
@@ -49,6 +59,9 @@ public abstract class EmbeddedCheckpoint : ICheckpoint
     protected abstract string TokenizerConfigResource { get; }
 
     public abstract string Name { get; }
+
+    /// <inheritdoc/>
+    public abstract int MaxContext { get; }
 
     public Stream OpenModel() => Open(ModelResource);
     public Stream OpenTokenizer() => Open(TokenizerResource);

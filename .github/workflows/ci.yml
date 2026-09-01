@@ -73,6 +73,14 @@ jobs:
       - name: Pack
         run: dotnet pack -c Release --nologo -o artifacts
 
+      # Weights-backed, so they belong here rather than in the fast matrix, which fetches
+      # no checkpoints. The example is built to prove it still compiles against the API.
+      - name: Integration tests
+        run: dotnet test tests/Tsfm.Forecasting.Kronos.IntegrationTests -c Release --nologo
+
+      - name: Build samples
+        run: dotnet build samples/CandleForecast -c Release --nologo
+
       # Catches metadata faults — a missing licence, an unembedded checkpoint — that
       # otherwise surface only on release.
       - name: Verify

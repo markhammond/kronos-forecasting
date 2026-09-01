@@ -2,16 +2,50 @@
 
 ## 0.1.1 — 2026-09-02
 
-Documentation reaches consumers for the first time.
+### Projected paths
+
+- `KronosForecaster.InferPath` writes the projected OHLCVA as `rows x horizon x 6`,
+  sized by `PathLength`. The decode always produced all six channels; only the close
+  was surfaced.
+- Rollouts are reduced per channel per step by a caller-supplied `RolloutAggregator`
+  (`ReadOnlySpan<float> -> float`), which is the shape the reference uses internally
+  (`np.mean(preds, axis=1)`). `Mean` is the default, matching it; `Median`,
+  `AtQuantile` and `Rollout` are provided. Samples are ordered by rollout index.
+- Paths are frequently not well-formed candles, and this is the model rather than the
+  port: channels decode independently with nothing tying `high` to `close`. A single
+  rollout broke ordering in roughly 30% to 70% of candles depending on the checkpoint,
+  smaller ones being worse; averaging across rollouts reduces that severalfold, cancelling
+  the noise rather than enforcing anything.
+  The reference does no post-processing either, and its headline example runs
+  `sample_count=1`. Clamp if you need valid candles.
+
+### Documentation reaches consumers
 
 - `GenerateDocumentationFile` was never set, so 0.1.0 shipped no `.xml` and gave
   consumers no IntelliSense beyond signatures. All five packages now carry it.
-- `KronosForecaster.Infer` documents every parameter, including which channels are
-  filled rather than ignored — the model reads six and has no mask, and the reference
-  derives amount as `volume * mean(open, high, low, close)`.
+- `Infer` documents every parameter, including which channels are filled rather than
+  ignored — the model reads six and has no mask, and the reference derives amount as
+  `volume * mean(open, high, low, close)`.
 - Both forecasters record that inference is not thread safe.
 
-No functional change; the ports are byte-for-byte the same.
+### Checkpoint limits
+
+- `ICheckpoint.MaxContext` states the longest context a checkpoint can attend over —
+  2048 for Kronos-mini, 512 for Kronos-small and -base. It varies by checkpoint, so it
+  is not a constant of the architecture.
+- `Infer` refuses a context beyond that limit rather than accepting it. Upstream
+  truncates silently, which reads as a working call that quietly ignored the excess.
+- `KronosForecaster.Channels` names the six-channel layout that was previously a bare
+  literal at every call site, and documents the row-major order with an example.
+
+### Allocation and API shape
+
+- Per-window scratch is rented once and passed in pre-sliced rather than allocated per
+  window, and the per-batch `ToArray()` in the sampler is gone.
+- **Breaking:** `WriteStamp` takes `Span<float>` rather than `float[]`. Source-compatible
+  for array callers, binary-breaking against 0.1.0.
+
+The Kronos and TimesFM inference paths are otherwise unchanged and still parity-verified.
 
 ## 0.1.0 — 2026-08-30
 

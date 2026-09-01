@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Tsfm.Forecasting.Samples.CandleForecast</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Mini keeps the fetch small; the API is identical for Small. -->
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.Kronos.Weights.Mini\Tsfm.Forecasting.Kronos.Weights.Mini.csproj" />
+    </ItemGroup>
+
+</Project>

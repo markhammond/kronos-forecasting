@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Tsfm.Forecasting.Kronos.IntegrationTests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+        <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Mini, not Small: 31 MB of checkpoint against 140 MB, and the path contract is
+             the same. These tests need weights, which is why they are not in the fast
+             suite — that one must stay runnable without a fetch. -->
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.Kronos.Weights.Mini\Tsfm.Forecasting.Kronos.Weights.Mini.csproj" />
+    </ItemGroup>
+
+</Project>
