@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1 — 2026-09-02
+
+Documentation reaches consumers for the first time.
+
+- `GenerateDocumentationFile` was never set, so 0.1.0 shipped no `.xml` and gave
+  consumers no IntelliSense beyond signatures. All five packages now carry it.
+- `KronosForecaster.Infer` documents every parameter, including which channels are
+  filled rather than ignored — the model reads six and has no mask, and the reference
+  derives amount as `volume * mean(open, high, low, close)`.
+- Both forecasters record that inference is not thread safe.
+
+No functional change; the ports are byte-for-byte the same.
+
 ## 0.1.0 — 2026-08-30
 
 First release of the family.

@@ -21,7 +21,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Version>0.1.0</Version>
+        <Version>0.1.1</Version>
         <Authors>Mark Hammond</Authors>
         <Copyright>Copyright (c) 2026 Mark Hammond</Copyright>
         <PackageReadmeFile>README.md</PackageReadmeFile>
