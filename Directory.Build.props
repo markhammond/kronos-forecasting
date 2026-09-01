@@ -12,6 +12,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <!-- Without this no .xml ships and consumers get no IntelliSense at all. CS1591 is
+             suppressed because most undocumented publics are TorchSharp weight-binding
+             fields, named to match the checkpoint rather than to be read. CS1573 stays on:
+             a documented method that silently omits a parameter is worse than none. -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>

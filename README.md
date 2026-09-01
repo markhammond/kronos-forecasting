@@ -55,6 +55,22 @@ forecaster.Infer(
     greedy: false, temperature: 1f, topP: 1f);
 ```
 
+### Supplying fewer than six channels
+
+The model always reads six channels and has no mask, so an absent one is **filled, not
+ignored** — whatever you supply is read as data. There is a single entry point rather
+than `ohlc`/`ohlcv` overloads, because choosing the filler is a modelling decision and
+belongs at the call site. These are the fills the reference implementation uses:
+
+| You have | volume | amount |
+|---|---|---|
+| OHLC | `0` | `0` |
+| OHLCV | as given | `volume * mean(open, high, low, close)` |
+| OHLCVA | as given | as given |
+
+Note the mean of all four prices, not the close. The reference rejects NaN in any of the
+six rather than treating it as absent, so fill explicitly.
+
 Checkpoints are embedded as assembly resources, so nothing resolves through
 configuration or the filesystem — which is what lets this sit behind a consumer
 forbidden from reading its environment. Buffers are caller-supplied and sized from

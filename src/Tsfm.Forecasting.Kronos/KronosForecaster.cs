@@ -15,6 +15,7 @@ namespace Tsfm.Forecasting.Kronos;
 /// and forfeits checkable parity. Costs one full pass per decode step per rollout, so it
 /// is affordable only at short horizons.</para>
 /// </summary>
+/// <remarks>Inference is not thread safe.</remarks>
 public sealed class KronosForecaster : IDisposable
 {
     private readonly KronosTokenizerEncoder _tokenizer;
@@ -39,8 +40,35 @@ public sealed class KronosForecaster : IDisposable
     /// One inference over a contiguous slice, re-windowed internally so the payload is
     /// O(L) rather than O(L·K).
     /// </summary>
+    /// <param name="ohlcva">
+    /// Row-major <c>[L x 6]</c>: open, high, low, close, volume, amount.
+    ///
+    /// <para>All six are read. There is no mask, so a channel you do not have must be
+    /// FILLED, and whatever you fill it with is read as data — it is not ignored. The
+    /// reference implementation fills both volume and amount with <i>zero</i> when neither
+    /// in available, and amount with <c>volume * mean(open, high, low, close)</c> —
+    /// the mean of all four prices, not the close — when only volume is. NaN is rejected
+    /// rather than treated as absent.</para>
+    /// </param>
+    /// <param name="barTimeMs">Close time per bar, Unix milliseconds, <c>[L]</c>. Cadence
+    /// is taken from the spacing, so no interval need be passed.</param>
+    /// <param name="lean">Receives <c>L − K + 1</c> medians of the projected mean return
+    /// over the horizon, relative to the anchor close. Caller-allocated.</param>
+    /// <param name="upCount">Receives the number of rollouts that finished positive.
+    /// Divide by <paramref name="rollouts"/> for an empirical P(up).</param>
+    /// <param name="dispersion">Receives the standard deviation across rollouts, or may be
+    /// empty to skip computing it.</param>
+    /// <param name="contextBars">Bars each window reads, K. Kronos-small tops out at 512.</param>
+    /// <param name="horizon">Bars projected ahead. Costs a full forward pass each, per
+    /// rollout — there is no key-value cache — so long horizons are expensive.</param>
+    /// <param name="rollouts">Monte Carlo samples per window.</param>
+    /// <param name="greedy">Take the argmax instead of sampling. Collapses dispersion.</param>
+    /// <param name="temperature">Logit temperature before sampling.</param>
+    /// <param name="topP">Nucleus cutoff.</param>
+    /// <param name="batch">Windows per forward pass.</param>
     /// <returns><c>L − K + 1</c> rows, the last anchored on the final bar. Forward
     /// timestamps are extrapolated from the bar interval, so no trailing bars are consumed.</returns>
+    /// <remarks>Not thread safe.</remarks>
     public bool Infer(ReadOnlySpan<float> ohlcva, ReadOnlySpan<long> barTimeMs,
         Span<float> lean, Span<int> upCount, Span<float> dispersion,
         int contextBars, int horizon, int rollouts, bool greedy,

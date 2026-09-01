@@ -46,8 +46,10 @@ public sealed class Safetensors : IDisposable
         return Load(buffer.GetBuffer(), (int)buffer.Length, label);   // GetBuffer: no final copy
     }
 
+    /// <param name="blob">Raw container bytes.</param>
     /// <param name="length">Payload length. <paramref name="blob"/> may be longer when it
     /// is a grown buffer.</param>
+    /// <param name="path">Label used in error messages.</param>
     private static Safetensors Load(byte[] blob, int length, string path)
     {
         if (length < 8) throw new InvalidDataException($"{path}: too short for a safetensors header");

@@ -13,6 +13,7 @@ namespace Tsfm.Forecasting.TimesFm;
 /// its own future values. Marking close alone would leak tomorrow's high, low and volume
 /// into today's forecast and flatter the model enormously.</para>
 /// </summary>
+/// <remarks>Inference is not thread safe.</remarks>
 public sealed class TimesFmForecaster(TimesFmModel model, TimesFmConfig config, Device device)
 {
     private const int CloseChannel = 3;    // open, high, low, close, volume, amount
@@ -29,7 +30,11 @@ public sealed class TimesFmForecaster(TimesFmModel model, TimesFmConfig config, 
     /// <summary>
     /// Forward-return quantiles for each step up to <paramref name="horizon"/>.
     /// </summary>
-    /// <param name="ohlcva">Row-major [L x 6]; L must be a multiple of the patch length.</param>
+    /// <param name="ohlcva">Row-major <c>[L x 6]</c>: open, high, low, close, volume,
+    /// amount. L must be a multiple of the patch length. Every channel is supplied as a
+    /// variate and marked a target, so none is handed its own future values.</param>
+    /// <param name="horizon">Steps ahead to return, 1..<c>OutputPatchLen</c>. All of them
+    /// come from one forward pass, so a longer horizon costs nothing extra.</param>
     /// <returns>[horizon, numQuantiles] of cumulative return relative to the anchor close.</returns>
     public double[,] Forecast(ReadOnlySpan<float> ohlcva, int horizon)
     {
