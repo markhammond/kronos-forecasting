@@ -7,4 +7,5 @@
   <Project Path="tests/Tsfm.Forecasting.Kronos.Tests/Tsfm.Forecasting.Kronos.Tests.csproj" />
   <Project Path="tests/Tsfm.Forecasting.Kronos.Parity/Tsfm.Forecasting.Kronos.Parity.csproj" />
   <Project Path="tests/Tsfm.Forecasting.TimesFm.Parity/Tsfm.Forecasting.TimesFm.Parity.csproj" />
+  <Project Path="tests/Tsfm.Forecasting.Bakeoff/Tsfm.Forecasting.Bakeoff.csproj" />
 </Solution>

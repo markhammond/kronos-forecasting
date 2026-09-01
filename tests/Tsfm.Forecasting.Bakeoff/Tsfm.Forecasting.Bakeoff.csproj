@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Tsfm.Forecasting.Bakeoff</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.Kronos\Tsfm.Forecasting.Kronos.csproj" />
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.Kronos.Weights.Small\Tsfm.Forecasting.Kronos.Weights.Small.csproj" />
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.TimesFm\Tsfm.Forecasting.TimesFm.csproj" />
+    </ItemGroup>
+
+</Project>
