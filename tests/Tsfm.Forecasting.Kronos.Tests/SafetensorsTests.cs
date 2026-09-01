@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using Xunit;
 
-namespace Kronos.Forecasting.Tests;
+namespace Tsfm.Forecasting.Kronos.Tests;
 
 /// <summary>
 /// The container format, exercised against payloads built here rather than against a

@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.Text.Json;
 using static TorchSharp.torch;
 
-namespace Kronos.Forecasting;
+namespace Tsfm.Forecasting;
 
 /// <summary>
 /// Reader for the safetensors container: 8-byte little-endian header length, that many

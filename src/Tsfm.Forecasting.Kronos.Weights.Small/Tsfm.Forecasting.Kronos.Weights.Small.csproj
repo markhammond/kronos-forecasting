@@ -1,20 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <AssemblyName>Kronos.Forecasting.Weights.Small</AssemblyName>
-        <RootNamespace>Kronos.Forecasting.Weights</RootNamespace>
-        <PackageId>Kronos.Forecasting.Weights.Small</PackageId>
-        <Description>Kronos-small (24.7M) weights with Kronos-Tokenizer-base for Kronos.Forecasting, embedded as assembly resources (~110 MB). Checkpoints redistributed unmodified from NeoQuasar (MIT) at the revision recorded in LICENSE.</Description>
+        <AssemblyName>Tsfm.Forecasting.Kronos.Weights.Small</AssemblyName>
+        <RootNamespace>Tsfm.Forecasting.Kronos.Weights</RootNamespace>
+        <PackageId>Tsfm.Forecasting.Kronos.Weights.Small</PackageId>
+        <Description>Kronos-small (24.7M) weights with Kronos-Tokenizer-base for Tsfm.Forecasting.Kronos, embedded as assembly resources (~110 MB). Checkpoints redistributed unmodified from NeoQuasar (MIT) at the revision recorded in LICENSE.</Description>
         <PackageTags>kronos;timeseries;forecasting;weights;model</PackageTags>
         <IsPackable>true</IsPackable>
         <!-- Checkpoints are fetched, not committed. See scripts/fetch-checkpoints.sh. -->
         <KronosCheckpointRoot Condition="'$(KronosCheckpointRoot)' == ''">$(MSBuildThisFileDirectory)../../checkpoints</KronosCheckpointRoot>
         <ModelSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-small/snapshots/901c26c1332695a2a8f243eb2f37243a37bea320</ModelSnapshot>
         <TokenizerSnapshot>$(KronosCheckpointRoot)/models--NeoQuasar--Kronos-Tokenizer-base/snapshots/0e0117387f39004a9016484a186a908917e22426</TokenizerSnapshot>
+            <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Kronos.Forecasting/Kronos.Forecasting.csproj" />
+        <ProjectReference Include="../Tsfm.Forecasting.Kronos/Tsfm.Forecasting.Kronos.csproj" />
     </ItemGroup>
 
     <ItemGroup>

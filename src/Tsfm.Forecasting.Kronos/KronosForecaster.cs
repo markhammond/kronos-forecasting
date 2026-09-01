@@ -2,7 +2,9 @@ using System.Buffers;
 using static TorchSharp.torch;
 using F = TorchSharp.torch.nn.functional;
 
-namespace Kronos.Forecasting;
+using Tsfm.Forecasting;
+
+namespace Tsfm.Forecasting.Kronos;
 
 /// <summary>
 /// End-to-end inference: raw bars in, per-window summaries out.
@@ -28,7 +30,7 @@ public sealed class KronosForecaster : IDisposable
 
     public string CheckpointName { get; private init; } = string.Empty;
 
-    public static KronosForecaster Load(IKronosCheckpoint checkpoint, Device device)
+    public static KronosForecaster Load(ICheckpoint checkpoint, Device device)
         => new(KronosTokenizerEncoder.FromCheckpoint(checkpoint, device),
                KronosModel.FromCheckpoint(checkpoint, device), device)
            { CheckpointName = checkpoint.Name };

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <IsTestProject>true</IsTestProject>
-        <RootNamespace>Kronos.Forecasting.Tests</RootNamespace>
+        <RootNamespace>Tsfm.Forecasting.Kronos.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../src/Kronos.Forecasting/Kronos.Forecasting.csproj" />
+        <ProjectReference Include="../../src/Tsfm.Forecasting.Kronos/Tsfm.Forecasting.Kronos.csproj" />
     </ItemGroup>
 
 </Project>

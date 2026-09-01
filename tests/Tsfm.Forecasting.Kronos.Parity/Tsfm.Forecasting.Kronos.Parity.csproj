@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <RootNamespace>Kronos.Forecasting.Parity</RootNamespace>
+        <RootNamespace>Tsfm.Forecasting.Kronos.Parity</RootNamespace>
         <!-- A development gate, not a shipped artefact. -->
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Kronos.Forecasting\Kronos.Forecasting.csproj" />
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.Kronos\Tsfm.Forecasting.Kronos.csproj" />
     </ItemGroup>
 
 </Project>

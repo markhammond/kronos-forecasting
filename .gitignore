@@ -13,3 +13,7 @@ checkpoints/
 
 # macOS Finder metadata
 .DS_Store
+
+# Fetched, not vendored — Google's Apache-2.0 sources and the tensors they generate.
+reference/timesfm3/
+reference/parity.safetensors

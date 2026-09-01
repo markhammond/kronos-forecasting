@@ -2,7 +2,9 @@ using TorchSharp;
 using TorchSharp.Modules;
 using static TorchSharp.torch;
 
-namespace Kronos.Forecasting;
+using Tsfm.Forecasting;
+
+namespace Tsfm.Forecasting.Kronos;
 
 /// <summary>
 /// The BSQ tokenizer: continuous OHLCVA bars to two 10-bit subtoken streams, and back.
@@ -116,7 +118,7 @@ public sealed class KronosTokenizerEncoder : nn.Module<Tensor, (Tensor s1, Tenso
         for (var i = 0; i < decoder.Count; i++) decoder[i].Load(st, $"decoder.{i}");
     }
 
-    public static KronosTokenizerEncoder FromCheckpoint(IKronosCheckpoint checkpoint, Device device)
+    public static KronosTokenizerEncoder FromCheckpoint(ICheckpoint checkpoint, Device device)
     {
         var cfg = System.Text.Json.JsonDocument.Parse(checkpoint.TokenizerConfigJson).RootElement;
         long G(string k) => cfg.GetProperty(k).GetInt64();

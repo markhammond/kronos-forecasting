@@ -18,10 +18,9 @@
         <Version>0.1.0</Version>
         <Authors>Mark Hammond</Authors>
         <Copyright>Copyright (c) 2026 Mark Hammond</Copyright>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/markhammond/kronos-forecasting</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/markhammond/kronos-forecasting</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/markhammond/tsfm-forecasting</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/markhammond/tsfm-forecasting</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -36,6 +35,7 @@
          third-party notices travel with the binaries rather than living only here. -->
     <ItemGroup Condition="'$(IsPackable)' == 'true'">
         <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="\" Visible="false" />
+        <None Include="$(MSBuildThisFileDirectory)NOTICE" Pack="true" PackagePath="\" Visible="false" />
         <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
     </ItemGroup>
 

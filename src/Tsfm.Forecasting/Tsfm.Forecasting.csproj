@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <PackageId>Tsfm.Forecasting</PackageId>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>Shared plumbing for time-series foundation model inference on .NET: a safetensors reader and the checkpoint abstraction. Model support ships in Tsfm.Forecasting.*</Description>
+        <PackageTags>timeseries;forecasting;foundation-model;safetensors;torchsharp</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TorchSharp" Version="0.107.0" />
+    </ItemGroup>
+
+</Project>

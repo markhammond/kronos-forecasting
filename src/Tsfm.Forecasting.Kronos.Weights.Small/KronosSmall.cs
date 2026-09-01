@@ -1,6 +1,9 @@
 using System.Reflection;
 
-namespace Kronos.Forecasting.Weights;
+using Tsfm.Forecasting;
+using Tsfm.Forecasting.Kronos;
+
+namespace Tsfm.Forecasting.Kronos.Weights;
 
 /// <summary>
 /// Kronos-small (24.7M parameters) with Kronos-Tokenizer-base. 512-token context.

@@ -2,7 +2,9 @@ using TorchSharp;
 using TorchSharp.Modules;
 using static TorchSharp.torch;
 
-namespace Kronos.Forecasting;
+using Tsfm.Forecasting;
+
+namespace Tsfm.Forecasting.Kronos;
 
 /// <summary>
 /// The autoregressive model over subtoken pairs. The two decode passes differ in cost:
@@ -63,7 +65,7 @@ public sealed class KronosModel : nn.Module
         for (var i = 0; i < transformer.Count; i++) transformer[i].Load(st, $"transformer.{i}");
     }
 
-    public static KronosModel FromCheckpoint(IKronosCheckpoint checkpoint, Device device)
+    public static KronosModel FromCheckpoint(ICheckpoint checkpoint, Device device)
     {
         var cfg = System.Text.Json.JsonDocument.Parse(checkpoint.ModelConfigJson).RootElement;
         long G(string k) => cfg.GetProperty(k).GetInt64();

@@ -2,7 +2,9 @@ using TorchSharp.Modules;
 using static TorchSharp.torch;
 using F = TorchSharp.torch.nn.functional;
 
-namespace Kronos.Forecasting;
+using Tsfm.Forecasting;
+
+namespace Tsfm.Forecasting.Kronos;
 
 /// <summary>Root-mean-square norm, weight-only. Compute in float32 and cast back, as the
 /// reference does; the width matters for parity when activations are narrower.</summary>

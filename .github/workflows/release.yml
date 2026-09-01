@@ -42,7 +42,7 @@ jobs:
       - name: Build and test
         run: |
           dotnet build -c Release --nologo
-          dotnet test tests/Kronos.Forecasting.Tests -c Release --nologo --no-build
+          dotnet test tests/Tsfm.Forecasting.Kronos.Tests -c Release --nologo --no-build
 
       - name: Pack
         run: dotnet pack -c Release --nologo --no-build -o artifacts

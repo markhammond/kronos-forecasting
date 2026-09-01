@@ -1,4 +1,4 @@
-namespace Kronos.Forecasting;
+namespace Tsfm.Forecasting;
 
 /// <summary>
 /// A source of pre-trained weights. Streams, not paths: an embedded resource is located
@@ -8,7 +8,7 @@ namespace Kronos.Forecasting;
 /// one codebook, and mixing them yields plausible numbers from meaningless tokens — so a
 /// checkpoint supplies both.</para>
 /// </summary>
-public interface IKronosCheckpoint
+public interface ICheckpoint
 {
     /// <summary>Repository name and revision, for provenance.</summary>
     string Name { get; }
@@ -23,7 +23,7 @@ public interface IKronosCheckpoint
 /// <summary>Load from the published snapshot layout: <c>config.json</c> beside
 /// <c>model.safetensors</c>. Development and parity only.</summary>
 public sealed class DirectoryCheckpoint(string modelDir, string tokenizerDir, string? name = null)
-    : IKronosCheckpoint
+    : ICheckpoint
 {
     public string Name { get; } = name ?? Path.GetFileName(modelDir.TrimEnd(Path.DirectorySeparatorChar));
 
@@ -40,7 +40,7 @@ public sealed class DirectoryCheckpoint(string modelDir, string tokenizerDir, st
 
 /// <summary>Checkpoint carried as embedded resources. Derived types supply the assembly
 /// and resource names.</summary>
-public abstract class EmbeddedCheckpoint : IKronosCheckpoint
+public abstract class EmbeddedCheckpoint : ICheckpoint
 {
     protected abstract System.Reflection.Assembly Host { get; }
     protected abstract string ModelResource { get; }

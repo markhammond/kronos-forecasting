@@ -1,5 +1,6 @@
 using static TorchSharp.torch;
-using Kronos.Forecasting;
+using Tsfm.Forecasting;
+using Tsfm.Forecasting.Kronos;
 
 // Parity harness. Each stage is compared against tensors exported from the reference,
 // and — where a stage feeds a discrete decision — the margin to the nearest flip is

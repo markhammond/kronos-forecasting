@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="src/Tsfm.Forecasting/Tsfm.Forecasting.csproj" />
+  <Project Path="src/Tsfm.Forecasting.Kronos/Tsfm.Forecasting.Kronos.csproj" />
+  <Project Path="src/Tsfm.Forecasting.Kronos.Weights.Small/Tsfm.Forecasting.Kronos.Weights.Small.csproj" />
+  <Project Path="src/Tsfm.Forecasting.Kronos.Weights.Mini/Tsfm.Forecasting.Kronos.Weights.Mini.csproj" />
+  <Project Path="src/Tsfm.Forecasting.TimesFm/Tsfm.Forecasting.TimesFm.csproj" />
+  <Project Path="tests/Tsfm.Forecasting.Kronos.Tests/Tsfm.Forecasting.Kronos.Tests.csproj" />
+  <Project Path="tests/Tsfm.Forecasting.Kronos.Parity/Tsfm.Forecasting.Kronos.Parity.csproj" />
+  <Project Path="tests/Tsfm.Forecasting.TimesFm.Parity/Tsfm.Forecasting.TimesFm.Parity.csproj" />
+</Solution>

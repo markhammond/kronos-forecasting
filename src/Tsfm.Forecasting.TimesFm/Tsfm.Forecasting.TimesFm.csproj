@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <PackageId>Tsfm.Forecasting.TimesFm</PackageId>
+        <AssemblyName>Tsfm.Forecasting.TimesFm</AssemblyName>
+        <RootNamespace>Tsfm.Forecasting.TimesFm</RootNamespace>
+        <!-- Apache-2.0, not MIT: this port derives from google-research/timesfm, which is
+             Apache-2.0. See NOTICE for the attribution and statement of changes. -->
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <Description>Native .NET inference for Google's TimesFM 3.0. NO WEIGHTS ARE INCLUDED OR AVAILABLE: the published checkpoints are under the TimesFM Non-Commercial License, permitting research and evaluation only and forbidding production or revenue-generating use. Supply your own checkpoint under Google's terms.</Description>
+        <PackageTags>timeseries;forecasting;foundation-model;timesfm;quantile;torchsharp</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Tsfm.Forecasting\Tsfm.Forecasting.csproj" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <None Include="..\..\LICENSE-Apache-2.0" Pack="true" PackagePath="\" Visible="false" />
+    </ItemGroup>
+
+</Project>
