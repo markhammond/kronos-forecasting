@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.2 — 2026-09-02
+
+Names two things that were previously literals a caller had to know.
+
+- `KronosForecaster.Channels` replaces the bare `6` at every call site, and carries the
+  row-major layout, the channel order and the amount derivation in its own documentation.
+- `ICheckpoint.MaxContext` states the longest context a checkpoint can attend over: 2048
+  for Kronos-mini, 512 for Kronos-small and -base. It varies by checkpoint, so it is not
+  a constant of the architecture.
+- `Infer` now refuses a context beyond that limit. Upstream truncates silently, which
+  reads as a working call that quietly ignored the bars beyond the ceiling.
+- The sample takes its context from the checkpoint rather than a hard-coded number, and
+  selects its device through `DeviceType` rather than a string.
+
+No change to inference; the ports remain parity-verified.
+
 ## 0.1.1 — 2026-09-02
 
 ### Projected paths
@@ -27,16 +43,6 @@
   ignored — the model reads six and has no mask, and the reference derives amount as
   `volume * mean(open, high, low, close)`.
 - Both forecasters record that inference is not thread safe.
-
-### Checkpoint limits
-
-- `ICheckpoint.MaxContext` states the longest context a checkpoint can attend over —
-  2048 for Kronos-mini, 512 for Kronos-small and -base. It varies by checkpoint, so it
-  is not a constant of the architecture.
-- `Infer` refuses a context beyond that limit rather than accepting it. Upstream
-  truncates silently, which reads as a working call that quietly ignored the excess.
-- `KronosForecaster.Channels` names the six-channel layout that was previously a bare
-  literal at every call site, and documents the row-major order with an example.
 
 ### Allocation and API shape
 
