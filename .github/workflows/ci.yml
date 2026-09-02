@@ -43,6 +43,12 @@ jobs:
       - name: Test
         run: dotnet test tests/Tsfm.Forecasting.Kronos.Tests -c Release --nologo --no-build
 
+      # Vacuous here by design: the TimesFM checkpoint is ~1.2 GB and non-commercially
+      # licensed, so it is never fetched on a runner. Running them anyway proves they
+      # compile and start; the assertions only bite on a developer machine.
+      - name: TimesFM tests (self-skipping without weights)
+        run: dotnet test tests/Tsfm.Forecasting.TimesFm.IntegrationTests -c Release --nologo
+
   # Packing embeds the checkpoints, so this job needs them. Platform-neutral.
   pack:
     runs-on: ubuntu-latest
@@ -79,7 +85,9 @@ jobs:
         run: dotnet test tests/Tsfm.Forecasting.Kronos.IntegrationTests -c Release --nologo
 
       - name: Build samples
-        run: dotnet build samples/CandleForecast -c Release --nologo
+        run: |
+          dotnet build samples/CandleForecast -c Release --nologo
+          dotnet build samples/GroceryCovariates -c Release --nologo
 
       # Catches metadata faults — a missing licence, an unembedded checkpoint — that
       # otherwise surface only on release.

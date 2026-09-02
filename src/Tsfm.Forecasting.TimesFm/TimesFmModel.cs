@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 using TorchSharp;
@@ -6,16 +10,13 @@ using TorchSharp.Modules;
 using static TorchSharp.torch;
 using static TorchSharp.torch.nn;
 
-using Tsfm.Forecasting;
-
-
 namespace Tsfm.Forecasting.TimesFm;
 
 /// <summary>Checkpoint hyper-parameters, read from the published config.json.</summary>
 public sealed record TimesFmConfig(
     int InputPatchLen, int OutputPatchLen, double[] Quantiles,
     int NumLayers, long ModelDims, long NumHeads,
-    bool UseVariateAttention, double ValueClip)
+    bool UseVariateAttention, int MaxVariates, double ValueClip)
 {
     public int Rolls => OutputPatchLen / InputPatchLen;
     public int NumQuantiles => Quantiles.Length;
@@ -34,6 +35,7 @@ public sealed record TimesFmConfig(
             t.GetProperty("model_dims").GetInt64(),
             t.GetProperty("num_heads").GetInt64(),
             r.GetProperty("use_variate_attention").GetBoolean(),
+            t.GetProperty("max_variates").GetInt32(),
             r.GetProperty("value_clip").GetDouble());
     }
 }

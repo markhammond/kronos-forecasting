@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <RootNamespace>Tsfm.Forecasting.Samples.GroceryCovariates</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Tsfm.Forecasting.TimesFm\Tsfm.Forecasting.TimesFm.csproj" />
+    </ItemGroup>
+
+</Project>

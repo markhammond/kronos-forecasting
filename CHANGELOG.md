@@ -1,5 +1,41 @@
 # Changelog
 
+## Unreleased
+
+### Joint forecasting with known-future covariates
+
+- `TimesFmForecaster.ForecastJoint` takes several series at once (up to 32), attends over
+  them jointly, and lets any of them carry values known into the future. Series are
+  normalised per variate, so mixing a price in the thousands with a flag in {0,1} needs no
+  scaling. There is no variate identity or ordering — the model sees anonymous series and
+  infers their relationship from co-movement in the supplied window.
+- A variate marked known-future is by construction not a forecast target; marking the
+  target is refused, since that would hand a series its own future.
+- The known future is gathered by rolling whole patches forward, so the context must be a
+  positive multiple of the patch length and leave at least one patch after it. Both are
+  now validated rather than producing a silently wrong anchor.
+- The variate ceiling is read from the checkpoint rather than hardcoded: it sits in the
+  same config block as the layer and head counts, so another checkpoint may declare a
+  different figure. `TimesFmForecaster.MaxVariates` reports what the loaded one states.
+- `samples/GroceryCovariates` reproduces the scenario from Google's covariates notebook —
+  ice cream and sunscreen, with temperature and promotion known for both weeks. Its
+  numbers are NOT comparable: the notebook uses the XReg path, which regresses covariates
+  on forecast residuals, whereas 3.0 attends over them as variates.
+
+### Packaging
+
+Only `Tsfm.Forecasting.TimesFm` changed. The other four are republished at the same
+version because a project reference packs an exact-version dependency, so TimesFm 0.1.3
+requires a core 0.1.3 to resolve against.
+
+### Testing
+
+- `Tsfm.Forecasting.TimesFm.IntegrationTests` covers the joint API, including that
+  changing a known-future variate actually moves the forecast, and that identical input
+  does not. These are **local only**: the TimesFM checkpoint is ~1.2 GB and
+  non-commercially licensed, so CI never fetches it and the tests pass vacuously there.
+  CI runs them regardless, which proves they compile and start.
+
 ## 0.1.2 — 2026-09-02
 
 Names two things that were previously literals a caller had to know.
